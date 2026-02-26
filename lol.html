@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LULZHER - 172 Champs Picker</title>
+    <style>
+        body { 
+            background-color: #010a13; color: #f0e6d2; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; font-family: 'Malgun Gothic', sans-serif;
+            border: 5px solid #1e2328;
+        }
+        .container { 
+            text-align: center; background: rgba(10, 20, 40, 0.95); 
+            padding: 40px; border: 2px solid #c8aa6e; border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,1); width: 380px; position: relative; overflow: hidden;
+        }
+        h1 { color: #c8aa6e; font-size: 24px; margin-bottom: 15px; text-shadow: 0 0 15px #785a28; letter-spacing: 2px; }
+
+        .mode-box { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 15px; }
+        .mode-btn {
+            background: #1e2328; color: #cdbe91; border: 1px solid #5b5a56;
+            padding: 8px 5px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;
+        }
+        .mode-btn:hover { border-color: #c8aa6e; color: #f0e6d2; }
+        .mode-btn.active { background: #785a28; color: #f0e6d2; border-color: #c8aa6e; }
+
+        .lane-box { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 25px; }
+        .lane-btn { 
+            background: #1e2328; color: #cdbe91; border: 1px solid #5b5a56;
+            padding: 10px 5px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s;
+        }
+        .lane-btn:hover { border-color: #c8aa6e; color: #f0e6d2; }
+        .lane-btn.active { background: #c8aa6e; color: #010a13; border-color: #f0e6d2; }
+
+        #display { 
+            height: 100px; line-height: 100px; font-size: 28px; font-weight: 800; 
+            color: #00bcff; background: rgba(0,0,0,0.6); border: 1px solid #c8aa6e;
+            margin: 20px 0; border-radius: 5px; overflow: hidden;
+        }
+
+        .main-btn { 
+            background: linear-gradient(to bottom, #c8aa6e, #785a28);
+            color: #f0e6d2; border: 1px solid #f0e6d2; padding: 18px 30px; 
+            font-size: 20px; font-weight: bold; cursor: pointer; width: 100%;
+        }
+        .main-btn:active { transform: scale(0.96); }
+
+        .footer-links { margin-top: 25px; display: flex; justify-content: space-between; font-size: 12px; }
+        .footer-links a { color: #a0946e; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>CHAMPION SELECT</h1>
+
+        <div class="mode-box">
+            <button class="mode-btn active" onclick="setMode('RANK', this)">🏆 랭크게임</button>
+            <button class="mode-btn" onclick="setMode('NORMAL', this)">🎮 일반게임</button>
+        </div>
+        
+        <div class="lane-box">
+            <button class="lane-btn active" onclick="setLane('TOP', this)">TOP</button>
+            <button class="lane-btn" onclick="setLane('JUG', this)">JUG</button>
+            <button class="lane-btn" onclick="setLane('MID', this)">MID</button>
+            <button class="lane-btn" onclick="setLane('ADC', this)">ADC</button>
+            <button class="lane-btn" onclick="setLane('SUP', this)">SUP</button>
+        </div>
+
+        <div id="display">TOP 모드</div>
+
+        <button class="main-btn" onclick="roll()">챔피언 결정</button>
+        
+        <div class="footer-links">
+            <span>Official Roster v2.5 (172 Champs)</span>
+        </div>
+    </div>
+
+    <script>
+        const rankData = {
+            'TOP': ["가렌", "갱플랭크", "나르", "나서스", "다리우스", "라이즈", "람머스", "레넥톤", "렝가", "리븐", "마오카이", "말파이트", "모데카이저", "문도 박사", "볼리베어", "뽀삐", "사이온", "세트", "쉔", "신지드", "아칼리", "아트록스", "오공", "오른", "올라프", "요릭", "우디르", "워윅", "이렐리아", "일라오이", "잭스", "제이스", "초가스", "카밀", "카시오페아", "케넌", "케일", "크산테", "클레드", "퀸", "타릭", "트린다미어", "트런들", "티모", "판테온", "피오라", "헤카림", "우르곳", "야스오", "요네", "신 짜오", "앰베사", "오로라", "자헨"],
+            'JUG': ["그라가스", "그레이브즈", "누누와 윌럼프", "니달리", "다이애나", "람머스", "렉사이", "렝가", "리 신", "릴리아", "마스터 이", "마오카이", "바이", "벨베스", "볼리베어", "브라이어", "비에고", "뽀삐", "샤코", "세주아니", "쉬바나", "스카너", "아이번", "아무무", "에코", "엘리스", "오공", "올라프", "우디르", "워윅", "이블린", "자르반 4세", "자크", "잭스", "카직스", "케인", "킨드레드", "탈리야", "트런들", "피들스틱", "헤카림", "탈론", "제드", "녹턴", "자헨"],
+            'MID': ["나피리", "네이코", "라이즈", "럭스", "르블랑", "리산드라", "마스터 이", "말자하", "모르가나", "벡스", "벨코즈", "빅토르", "사일러스", "샤코", "세라핀", "세트", "스웨인", "스몰더", "신드라", "아리", "아우렐리온 솔", "아지르", "아칼리", "아크샨", "애니", "애니비아", "야스오", "에코", "오리아나", "요네", "이렐리아", "제드", "제라스", "조이", "직스", "카사딘", "카타리나", "카시오페아", "카서스", "코르키", "탈론", "트위스티드 페이트", "판테온", "피즈", "흐웨이", "갈리오", "베이가", "블라디미르", "멜", "유나라", "자헨", "오로라"],
+            'ADC': ["그레이브즈", "드레이븐", "루시안", "닐라", "미스 포츈", "바루스", "베인", "사미라", "세나", "스몰더", "시비르", "아펠리오스", "애쉬", "이즈리얼", "자야", "제리", "진", "징크스", "카이사", "칼리스타", "케이틀린", "코그모", "퀸", "트리스타나", "트위치", "직스", "야스오", "유나라", "자헨"],
+            'SUP': ["갈리오", "나미", "노틸러스", "니코", "럭스", "레나타 글라스크", "레오나", "룰루", "리산드라", "마오카이", "모르가나", "밀리오", "바드", "벨코즈", "브라움", "블리츠크랭크", "뽀삐", "세나", "세라핀", "세트", "소나", "소라카", "스웨인", "쓰레쉬", "아무무", "알리스타", "애니", "애쉬", "오른", "유미", "이블린", "잔나", "제라스", "조이", "질리언", "카르마", "타릭", "파이크", "렐", "하이머딩거", "라칸", "멜", "자헨"]
+        };
+
+        const allChamps = [
+            "가렌", "갈리오", "갱플랭크", "그라가스", "그레이브즈",
+            "나르", "나미", "나서스", "나피리", "네이코", "녹턴", "노틸러스", "누누와 윌럼프", "니달리", "니코",
+            "다리우스", "다이애나", "드레이븐",
+            "라이즈", "라칸", "람머스", "럭스", "레나타 글라스크", "레넥톤", "레오나", "렉사이", "렐", "렝가", "르블랑", "리 신", "리산드라", "리븐", "릴리아",
+            "마스터 이", "마오카이", "말자하", "말파이트", "멜", "모데카이저", "모르가나", "문도 박사", "밀리오",
+            "바드", "바루스", "바이", "베이가", "베인", "벡스", "벨베스", "벨코즈", "볼리베어", "브라움", "브라이어", "블라디미르", "블리츠크랭크", "비에고", "빅토르", "뽀삐",
+            "사미라", "사이온", "사일러스", "샤코", "세나", "세라핀", "세주아니", "세트", "소나", "소라카", "스몰더", "스웨인", "스카너", "시비르", "신 짜오", "신드라", "신지드",
+            "아리", "아무무", "아우렐리온 솔", "아이번", "아지르", "아칼리", "아크샨", "아트록스", "아펠리오스", "알리스타", "애니", "애니비아", "애쉬", "야스오", "에코", "엘리스", "오공", "오로라", "오리아나", "오른", "올라프", "요네", "요릭", "우디르", "우르곳", "워윅", "유나라", "유미", "이렐리아", "이블린", "이즈리얼", "일라오이",
+            "자르반 4세", "자야", "자크", "자헨", "잔나", "잭스", "제드", "제라스", "제이스", "제리", "조이", "질리언", "징크스", "직스", "진",
+            "카르마", "카밀", "카사딘", "카서스", "카시오페아", "카이사", "카직스", "카타리나", "칼리스타", "케넌", "케이틀린", "케일", "케인", "코그모", "코르키", "크산테", "클레드", "킨드레드",
+            "탈론", "탈리야", "타릭", "트린다미어", "트런들", "트리스타나", "트위스티드 페이트", "트위치", "티모",
+            "판테온", "파이크", "피들스틱", "피오라", "피즈",
+            "하이머딩거", "헤카림", "흐웨이",
+            "앰베사", "닐라", "루시안", "미스 포츈", "초가스", "쉔", "쉬바나", "렉사이"
+        ];
+
+        const normalData = {
+            'TOP': allChamps,
+            'JUG': allChamps,
+            'MID': allChamps,
+            'ADC': allChamps,
+            'SUP': allChamps
+        };
+
+        let selectedLane = 'TOP';
+        let selectedMode = 'RANK';
+
+        function setMode(mode, el) {
+            selectedMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('display').innerText = selectedLane + " 모드";
+            document.getElementById('display').style.color = "#00bcff";
+        }
+
+        function setLane(lane, el) {
+            selectedLane = lane;
+            document.querySelectorAll('.lane-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('display').innerText = lane + " 모드";
+            document.getElementById('display').style.color = "#00bcff";
+        }
+
+        function spawnSparkles() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 18; i++) {
+                const spark = document.createElement('div');
+                spark.innerText = '✦';
+                spark.style.cssText = `
+                    position: absolute;
+                    color: #c8aa6e;
+                    font-size: ${Math.random() * 16 + 8}px;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    opacity: 1;
+                    pointer-events: none;
+                    transition: opacity 1s ease, transform 1s ease;
+                    transform: translate(0, 0);
+                    z-index: 99;
+                `;
+                container.appendChild(spark);
+                setTimeout(() => {
+                    spark.style.opacity = '0';
+                    spark.style.transform = `translate(${(Math.random()-0.5)*60}px, ${-Math.random()*60}px)`;
+                }, 50);
+                setTimeout(() => spark.remove(), 1100);
+            }
+        }
+
+        function flashDisplay(display) {
+            let flashes = 0;
+            const flash = setInterval(() => {
+                display.style.boxShadow = flashes % 2 === 0 
+                    ? '0 0 30px #c8aa6e, 0 0 60px #c8aa6e' 
+                    : 'none';
+                flashes++;
+                if (flashes > 6) {
+                    clearInterval(flash);
+                    display.style.boxShadow = 'none';
+                }
+            }, 150);
+        }
+
+        function roll() {
+            const display = document.getElementById('display');
+            const pool = selectedMode === 'RANK' ? rankData[selectedLane] : normalData[selectedLane];
+            let count = 0;
+
+            const interval = setInterval(() => {
+                display.innerText = pool[Math.floor(Math.random() * pool.length)];
+                display.style.color = "#00bcff";
+                count++;
+                if(count > 20) {
+                    clearInterval(interval);
+                    const final = pool[Math.floor(Math.random() * pool.length)];
+                    display.innerText = "★ " + final + " ★";
+                    display.style.color = "#c8aa6e";
+                    spawnSparkles();
+                    flashDisplay(display);
+                }
+            }, 50);
+        }
+    </script>
+</body>
+</html>
